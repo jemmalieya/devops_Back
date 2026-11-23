@@ -1,0 +1,52 @@
+
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven'
+    }
+
+    triggers {
+        githubPush()
+    }
+
+    stages {
+
+        // Stage 1 : Recuperation du code
+        stage('Checkout') {
+            steps {
+                echo 'Recuperation du code GitHub'
+
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/jemmalieya/devops_Back.git'
+            }
+        }
+
+        // Stage 2 : Clean et Test
+        stage('Build and Test') {
+            steps {
+                echo 'Execution des tests Maven'
+                sh 'mvn clean test'
+            }
+        }
+
+        // Stage 3 : Package
+        stage('Package') {
+            steps {
+                echo 'Generation du package'
+                sh 'mvn package -DskipTests'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline termine avec succes !'
+        }
+
+        failure {
+            echo 'Erreur dans le pipeline !'
+        }
+    }
+}
