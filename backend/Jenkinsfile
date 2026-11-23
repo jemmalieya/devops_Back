@@ -12,10 +12,9 @@ pipeline {
 
     stages {
 
-        // Stage 1 : Recuperation du code
         stage('Checkout') {
             steps {
-                echo 'Recuperation du code GitHub'
+                echo 'Recuperation du code depuis GitHub'
 
                 git branch: 'main',
                     credentialsId: 'github-credentials',
@@ -23,19 +22,21 @@ pipeline {
             }
         }
 
-        // Stage 2 : Clean et Test
-        stage('Build and Test') {
+        stage('Clean and Test') {
             steps {
-                echo 'Execution des tests Maven'
-                sh 'mvn clean test'
+                dir('backend') {
+                    echo 'Execution de Maven Clean et Test'
+                    sh './mvnw clean test'
+                }
             }
         }
 
-        // Stage 3 : Package
         stage('Package') {
             steps {
-                echo 'Generation du package'
-                sh 'mvn package -DskipTests'
+                dir('backend') {
+                    echo 'Creation du package'
+                    sh './mvnw package -DskipTests'
+                }
             }
         }
     }
@@ -46,7 +47,11 @@ pipeline {
         }
 
         failure {
-            echo 'Erreur dans le pipeline !'
+            echo 'Echec du pipeline !'
+        }
+
+        always {
+            echo 'Fin du pipeline'
         }
     }
 }
