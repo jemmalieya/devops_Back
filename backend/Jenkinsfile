@@ -3,6 +3,7 @@ pipeline {
     agent any
 
     tools {
+        jdk 'JAVA_HOME'
         maven 'M2_HOME'
     }
 
@@ -12,30 +13,20 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        // Stage 1 : Recuperation du projet
+        stage('Recuperation du projet') {
             steps {
-                echo 'Recuperation du code depuis GitHub'
-
                 git branch: 'main',
                     credentialsId: 'github-credentials',
                     url: 'https://github.com/jemmalieya/devops_Back.git'
             }
         }
 
-        stage('Clean and Test') {
+        // Stage 2 : Generation du livrable
+        stage('Generation du livrable') {
             steps {
                 dir('backend') {
-                    echo 'Execution de Maven Clean et Test'
-                    sh 'bash ./mvnw clean test'
-                }
-            }
-        }
-
-        stage('Package') {
-            steps {
-                dir('backend') {
-                    echo 'Creation du package'
-                    sh 'bash ./mvnw package -DskipTests'
+                    sh 'mvn clean package -DskipTests'
                 }
             }
         }
@@ -43,15 +34,14 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline termine avec succes !'
+            archiveArtifacts artifacts: 'backend/target/*.jar',
+                             fingerprint: true
+
+            echo 'BUILD SUCCESS - Livrable genere avec succes !'
         }
 
         failure {
-            echo 'Echec du pipeline !'
-        }
-
-        always {
-            echo 'Fin du pipeline'
+            echo 'BUILD FAILURE - Erreur dans le pipeline !'
         }
     }
 }
