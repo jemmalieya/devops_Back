@@ -26,7 +26,7 @@ pipeline {
             steps {
                 dir('backend') {
                     echo 'Execution de Maven Clean et Test'
-                    sh './mvnw clean test'
+                    sh 'bash ./mvnw clean test'
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
             steps {
                 dir('backend') {
                     echo 'Creation du package'
-                    sh './mvnw package -DskipTests'
+                    sh 'bash ./mvnw package -DskipTests'
                 }
             }
         }
